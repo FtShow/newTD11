@@ -5,6 +5,7 @@ import {EditableSpan} from './EditableSpan';
 import {Button, Checkbox, IconButton} from "@mui/material";
 import {Delete} from "@mui/icons-material";
 import {ButtonMemo} from "./ButtonMemo";
+import {Task} from "./Task";
 
 
 export type TaskType = {
@@ -52,7 +53,13 @@ export const Todolist = memo((props: PropsType) => {
     if (props.filter === "completed") {
         tasks = tasks.filter(t => t.isDone);
     }
-
+    const removeTask = useCallback((taskId: string) => props.removeTask(taskId, props.id), [props.id, props.removeTask])
+    const changeTaskStatus = useCallback((taskId: string, newIsDoneValue: boolean) => {
+                props.changeTaskStatus(taskId, newIsDoneValue, props.id);
+    }, [props.id, props.changeTaskStatus])
+    const changeTaskTitle = useCallback((taskId: string, newValue: string) => {
+        props.changeTaskTitle(taskId, newValue, props.id);
+    }, [props.id, props.changeTaskTitle])
     // @ts-ignore
     return <div>
         <h3><EditableSpan value={props.title} onChange={changeTodolistTitle}/>
@@ -64,28 +71,14 @@ export const Todolist = memo((props: PropsType) => {
         <div>
             {
                 tasks.map(t => {
-                    const onClickHandler = () => props.removeTask(t.id, props.id)
-                    const onChangeHandler = (e: ChangeEvent<HTMLInputElement>) => {
-                        let newIsDoneValue = e.currentTarget.checked;
-                        props.changeTaskStatus(t.id, newIsDoneValue, props.id);
-                    }
-                    const onTitleChangeHandler = (newValue: string) => {
-                        props.changeTaskTitle(t.id, newValue, props.id);
-                    }
 
 
-                    return <div key={t.id} className={t.isDone ? "is-done" : ""}>
-                        <Checkbox
-                            checked={t.isDone}
-                            color="primary"
-                            onChange={onChangeHandler}
-                        />
 
-                        <EditableSpan value={t.title} onChange={onTitleChangeHandler}/>
-                        <IconButton onClick={onClickHandler}>
-                            <Delete/>
-                        </IconButton>
-                    </div>
+                    return <Task key={t.id}
+                                 task={t}
+                                 removeTask={removeTask}
+                                 changeTaskStatus={changeTaskStatus}
+                                 changeTaskTitle={changeTaskTitle}/>
                 })
             }
         </div>
